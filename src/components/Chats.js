@@ -45,6 +45,7 @@ function Chats() {
           </form>
         </div>
         <div className="p-2">
+          {/* Handled loading here */}
           {chats ? chats.map((chat) => <ChatForm chat={chat} key={chat.id} />) : <div className=" ">Loading...</div>}
         </div>
       </div>

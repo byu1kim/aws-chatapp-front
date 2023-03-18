@@ -8,6 +8,7 @@ export default function MessageForm({ chat }) {
   const [name, setName] = useState(chat.name);
   const [edit, setEdit] = useState(false);
 
+  // Display message panel on the right
   const handleMessagePanel = () => {
     setChatId(chat.id);
     setChatName(chat.name);
@@ -16,15 +17,18 @@ export default function MessageForm({ chat }) {
     });
   };
 
+  // Delete chat and reset messages
   const handleChatDelete = () => {
     axios.delete(apiUrl + `/chats/${chat.id}`).then((res) => setChats(res.data.chats));
     setMessages();
   };
 
+  // Handle edit const
   const handleChatEdit = () => {
     setEdit(true);
   };
 
+  // Edit chat name
   const handleChatEditSubmit = () => {
     axios.put(apiUrl + `/chats/${chat.id}`, { name: name }).then((res) => setName(res.data.chat.name));
     setEdit(false);
@@ -32,6 +36,7 @@ export default function MessageForm({ chat }) {
 
   return (
     <div key={chat.id} className="flex p-2">
+      {/* Display edit form if edit is true, or display just chatname */}
       {edit ? (
         <form
           className="w-full flex"
@@ -48,11 +53,12 @@ export default function MessageForm({ chat }) {
           {name}
         </div>
       )}
-
+      {/* Edit button */}
       <button className="hover:text-rose-400 mr-2" onClick={handleChatEdit}>
         <i className="fa-solid fa-pen pr-2"></i>
       </button>
 
+      {/* Delete button */}
       <button className="hover:text-rose-400" onClick={handleChatDelete}>
         <i className="fa-solid fa-trash-can"></i>
       </button>

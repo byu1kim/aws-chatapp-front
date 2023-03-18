@@ -13,6 +13,7 @@ function Messages() {
     e.preventDefault();
     setBtnDis(true);
 
+    // Simple case for AI replies..
     let reply;
     if (content.includes("hi") || content.includes("hello")) {
       reply = "Hi!";
@@ -41,6 +42,7 @@ function Messages() {
           <div className="flex justify-center">
             Messages with<span className="font-bold">&nbsp;{chatName}</span>
           </div>
+          {/* Display 'start' message if messages are none */}
           {messages
             ? messages.map((message) => <MessageForm message={message} key={message.id} />)
             : "Start your message"}
