@@ -7,10 +7,12 @@ function Messages() {
   const { apiUrl, chatId, messages, setMessages, chatName } = useContext(GlobalContext);
 
   const [content, setContent] = useState("");
+  // If submit is on process, disable the submit form so user don't submit during the process
   const [btnDis, setBtnDis] = useState(false);
 
   const handleMessageSubmit = (e) => {
     e.preventDefault();
+    // disable submit form
     setBtnDis(true);
 
     // Simple case for AI replies..
@@ -29,9 +31,9 @@ function Messages() {
 
     axios.post(apiUrl + `/messages/${chatId}`, { chat_id: chatId, content: content, reply: reply }).then((res) => {
       setMessages([...messages, res.data.message]);
+      // enable submit form
       setBtnDis(false);
     });
-    console.log("clicked message submit!");
     setContent("");
   };
 
