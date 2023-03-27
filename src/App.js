@@ -54,7 +54,7 @@ function App() {
           <Messages />
         ) : (
           <div className="flex flex-col h-full justify-center items-center text-2xl">
-            Click new chat to start conversation<p className="text-lg">Ask Byulpt today's weahter!</p>
+            Click new chat to start conversation<p className="text-lg">Ask Byulpt today's weather!</p>
           </div>
         )}
       </div>

@@ -2,6 +2,7 @@ import { useState, useContext } from "react";
 import axios from "axios";
 import { GlobalContext } from "./GlobalContext";
 import MessageForm from "./MessageForm";
+import { Reply } from "../reply";
 
 function Messages() {
   const { apiUrl, chatId, messages, setMessages, chatName } = useContext(GlobalContext);
@@ -16,18 +17,7 @@ function Messages() {
     setBtnDis(true);
 
     // Simple case for AI replies..
-    let reply;
-    if (content.includes("hi") || content.includes("hello")) {
-      reply = "Hi!";
-    } else if (content.includes("how are you")) {
-      reply = "I'm find, and you?";
-    } else if (content.includes("weather")) {
-      reply = "Check here! https://weather.gc.ca/city/pages/bc-74_metric_e.html ";
-    } else if (content.includes("good")) {
-      reply = "Glad to hear that!";
-    } else {
-      reply = "Sorry, I'm not ready to answer that question yet.";
-    }
+    const reply = Reply(content);
 
     axios.post(apiUrl + `/messages/${chatId}`, { chat_id: chatId, content: content, reply: reply }).then((res) => {
       setMessages([...messages, res.data.message]);
