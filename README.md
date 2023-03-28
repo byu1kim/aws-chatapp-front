@@ -28,3 +28,10 @@ CRUD
 ### components/Messages.js
 
 CRUD
+
+### Todo
+
+- [ ] Login/Logout/signup
+- [ ] Edit DB
+- [ ] Logged in > CRUD
+- [ ] Logged out > CRUD, direct to Login Page

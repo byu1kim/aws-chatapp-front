@@ -1,7 +1,7 @@
 import { useContext, useState, useEffect } from "react";
 import { GlobalContext } from "./GlobalContext";
-import axios from "axios";
 import ChatForm from "../components/ChatForm";
+import { Auth, API } from "aws-amplify";
 
 function Chats() {
   const { apiUrl, chats, setChats } = useContext(GlobalContext);
@@ -9,13 +9,20 @@ function Chats() {
   const [name, setName] = useState("");
   const [panelOpen, setPanelOpen] = useState(false);
 
-  useEffect(() => {
-    axios.get(apiUrl + "/chats").then((res) => setChats(res.data.chats));
-  }, [apiUrl, setChats]);
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    axios.post(apiUrl + "/chats", { name: name }).then((res) => setChats([res.data.chat, ...chats]));
+    try {
+      const response = await API.post("api", "/chats", {
+        body: { name: name },
+        headers: {
+          Authorization: `Bearer ${(await Auth.currentSession()).getAccessToken().getJwtToken()}`,
+        },
+      });
+      console.log(response);
+      setChats([response.chat, ...chats]);
+    } catch (error) {
+      alert(error);
+    }
     setName("");
     setPanelOpen(false);
   };
@@ -23,6 +30,19 @@ function Chats() {
   const handlePanel = () => {
     setPanelOpen(!panelOpen);
   };
+
+  useEffect(() => {
+    async function getReq() {
+      const res = await API.get("api", "/chats", {
+        headers: {
+          Authorization: `Bearer ${(await Auth.currentSession()).getAccessToken().getJwtToken()}`,
+        },
+      });
+      console.log(res.chats);
+      setChats(res.chats);
+    }
+    getReq();
+  }, [apiUrl, setChats]);
 
   return (
     <>

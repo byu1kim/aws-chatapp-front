@@ -1,27 +1,43 @@
 import { useContext, useState } from "react";
-import axios from "axios";
 import { GlobalContext } from "./GlobalContext";
+import { Auth, API } from "aws-amplify";
 
 export default function MessageForm({ message }) {
-  const { apiUrl, chatId, setMessages } = useContext(GlobalContext);
+  const { chatId, setMessages } = useContext(GlobalContext);
 
   const [content, setContent] = useState(message.content);
   const [edit, setEdit] = useState(false);
 
-  const handleMessageDelete = (messageId) => {
-    axios.delete(apiUrl + `/messages/${chatId}/${messageId}`).then((res) => setMessages(res.data.messages));
+  const handleMessageDelete = async (messageId) => {
+    try {
+      const res = await API.del("api", `/messages/${chatId}/${messageId}`, {
+        headers: {
+          Authorization: `Bearer ${(await Auth.currentSession()).getAccessToken().getJwtToken()}`,
+        },
+      });
+      setMessages(res.messages);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const handleMessageEdit = () => {
     setEdit(true);
   };
 
-  const handleMessageEditSubmit = (messageId) => {
-    axios
-      .put(apiUrl + `/messages/${chatId}/${messageId}`, { content: content })
-      .then((res) => setContent(res.data.message.content));
-    setEdit(false);
-    console.log("edited!");
+  const handleMessageEditSubmit = async (messageId) => {
+    try {
+      const response = await API.put("api", `/messages/${chatId}/${messageId}`, {
+        body: { content: content },
+        headers: {
+          Authorization: `Bearer ${(await Auth.currentSession()).getAccessToken().getJwtToken()}`,
+        },
+      });
+      setContent(response.message.content);
+      setEdit(false);
+    } catch (error) {
+      alert(error);
+    }
   };
 
   return (

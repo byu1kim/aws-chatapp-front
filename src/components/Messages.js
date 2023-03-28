@@ -1,17 +1,17 @@
 import { useState, useContext } from "react";
-import axios from "axios";
 import { GlobalContext } from "./GlobalContext";
 import MessageForm from "./MessageForm";
 import { Reply } from "../reply";
+import { Auth, API } from "aws-amplify";
 
 function Messages() {
-  const { apiUrl, chatId, messages, setMessages, chatName } = useContext(GlobalContext);
+  const { chatId, messages, setMessages, chatName } = useContext(GlobalContext);
 
   const [content, setContent] = useState("");
   // If submit is on process, disable the submit form so user don't submit during the process
   const [btnDis, setBtnDis] = useState(false);
 
-  const handleMessageSubmit = (e) => {
+  const handleMessageSubmit = async (e) => {
     e.preventDefault();
     // disable submit form
     setBtnDis(true);
@@ -19,11 +19,20 @@ function Messages() {
     // Simple case for AI replies..
     const reply = Reply(content);
 
-    axios.post(apiUrl + `/messages/${chatId}`, { chat_id: chatId, content: content, reply: reply }).then((res) => {
-      setMessages([...messages, res.data.message]);
-      // enable submit form
+    try {
+      const response = await API.post("api", `/messages/${chatId}`, {
+        body: { chat_id: chatId, content: content, reply: reply },
+        headers: {
+          Authorization: `Bearer ${(await Auth.currentSession()).getAccessToken().getJwtToken()}`,
+        },
+      });
+      console.log(response);
+      setMessages([...messages, response.message]);
       setBtnDis(false);
-    });
+    } catch (error) {
+      alert(error);
+    }
+
     setContent("");
   };
 
@@ -32,7 +41,7 @@ function Messages() {
       <div className="h-full flex flex-col">
         <div className="h-full p-5 overflow-auto">
           <div className="flex justify-center">
-            Messages with<span className="font-bold">&nbsp;{chatName}</span>
+            Chat : <span className="font-bold">&nbsp;{chatName}</span>
           </div>
           {/* Display 'start' message if messages are none */}
           {messages

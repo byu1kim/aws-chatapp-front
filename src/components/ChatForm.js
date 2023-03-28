@@ -1,6 +1,7 @@
 import { useContext, useState } from "react";
 import axios from "axios";
 import { GlobalContext } from "./GlobalContext";
+import { Auth, API } from "aws-amplify";
 
 export default function MessageForm({ chat }) {
   const { apiUrl, setChats, setChatId, setChatName, setMessages } = useContext(GlobalContext);
@@ -9,18 +10,35 @@ export default function MessageForm({ chat }) {
   const [edit, setEdit] = useState(false);
 
   // Display message panel on the right
-  const handleMessagePanel = () => {
+  const handleMessagePanel = async () => {
     setChatId(chat.id);
     setChatName(chat.name);
-    axios.get(apiUrl + `/messages/${chat.id}`).then((res) => {
-      setMessages(res.data.messages);
-    });
+    try {
+      const res = await API.get("api", `/messages/${chat.id}`, {
+        headers: {
+          Authorization: `Bearer ${(await Auth.currentSession()).getAccessToken().getJwtToken()}`,
+        },
+      });
+      setMessages(res.messages);
+    } catch (e) {
+      console.log(e);
+    }
   };
 
   // Delete chat and reset messages
-  const handleChatDelete = () => {
-    axios.delete(apiUrl + `/chats/${chat.id}`).then((res) => setChats(res.data.chats));
-    setMessages();
+  const handleChatDelete = async () => {
+    try {
+      const response = await API.del("api", `/chats/${chat.id}`, {
+        headers: {
+          Authorization: `Bearer ${(await Auth.currentSession()).getAccessToken().getJwtToken()}`,
+        },
+      });
+      console.log(response);
+      setChats(response.chats);
+      setMessages();
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   // Handle edit const
@@ -29,9 +47,19 @@ export default function MessageForm({ chat }) {
   };
 
   // Edit chat name
-  const handleChatEditSubmit = () => {
-    axios.put(apiUrl + `/chats/${chat.id}`, { name: name }).then((res) => setName(res.data.chat.name));
-    setEdit(false);
+  const handleChatEditSubmit = async () => {
+    try {
+      const response = await API.put("api", `/chats/${chat.id}`, {
+        body: { name: name },
+        headers: {
+          Authorization: `Bearer ${(await Auth.currentSession()).getAccessToken().getJwtToken()}`,
+        },
+      });
+      setName(response.chat.name);
+      setEdit(false);
+    } catch (error) {
+      alert(error);
+    }
   };
 
   return (
